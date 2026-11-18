@@ -10,10 +10,16 @@ const STORAGE_PREFIX = 'cidr-readable'
  * - `idle`: nothing typed yet;
  * - `no-entries`: only comments, separators or blank lines;
  * - `only-errors`: there are entries, but none of them is valid;
+ * - `has-errors`: some entries are invalid and the mode withholds partial results
+ *   (`mode.blockOnErrors`);
  * - `empty-result`: valid entries that produce nothing (everything is denied);
  * - `ready`: there is a result to show.
+ *
+ * Errors are checked before the result: in Deny mode, invalid entries still produce a result
+ * (everything is allowed), and it must never be shown as if it were correct.
  */
-export type ConverterStatus = 'idle' | 'no-entries' | 'only-errors' | 'empty-result' | 'ready'
+export type ConverterStatus =
+  'idle' | 'no-entries' | 'only-errors' | 'has-errors' | 'empty-result' | 'ready'
 
 /**
  * State of one converter screen: the input (persisted per mode), the selected list style
@@ -40,10 +46,10 @@ export function useConverter(mode: ConverterMode) {
   const status = computed<ConverterStatus>(() => {
     const { inputEntryCount, entries } = result.value
     if (!hasInput.value) return 'idle'
-    if (entries.length > 0) return 'ready'
     if (inputEntryCount === 0) return 'no-entries'
     if (errorCount.value === inputEntryCount) return 'only-errors'
-    return 'empty-result'
+    if (errorCount.value > 0 && mode.blockOnErrors === true) return 'has-errors'
+    return entries.length > 0 ? 'ready' : 'empty-result'
   })
 
   const outputText = computed(() => {

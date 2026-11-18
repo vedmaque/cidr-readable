@@ -7,6 +7,10 @@ export interface Token {
 /** `AllowedIPs =`, `DisallowedIPs =` etc. — any `Key =` prefix copied along with a config line. */
 const CONFIG_KEY_RE = /^\s*[A-Za-z][\w-]*\s*=/
 
+/** A complete range written with spaces, such as `[0 - 15]`. */
+const SPACED_RANGE_RE = /\[\s*(\d+)\s*-\s*(\d+)\s*\]/g
+const SEPARATOR_RE = /[\s,]+/
+
 function stripNoise(line: string): string {
   const commentStart = line.indexOf('#')
   const code = commentStart === -1 ? line : line.slice(0, commentStart)
@@ -14,28 +18,17 @@ function stripNoise(line: string): string {
 }
 
 /**
- * Splits free-form input into entries. Entries are separated by newlines, commas or whitespace;
- * whitespace inside `[...]` is kept so that `[0 - 15]` stays one entry.
+ * Splits free-form input into entries. Entries are separated by newlines, commas or whitespace.
+ * Spaces inside a complete range (`[0 - 15]`) are removed first so it stays one entry; anything
+ * else, including a malformed bracket, never joins entries, so one typo can't hide the next one.
  * `# comments` and `Key =` prefixes (as in a WireGuard config) are ignored.
  */
 export function tokenize(input: string): Token[] {
-  const tokens: Token[] = []
-  input.split(/\r?\n/).forEach((rawLine, index) => {
-    const line = index + 1
-    let current = ''
-    let bracketDepth = 0
-    const flush = (): void => {
-      if (current !== '') tokens.push({ text: current, line })
-      current = ''
-    }
-    for (const char of stripNoise(rawLine)) {
-      if (char === '[') bracketDepth++
-      if (char === ']') bracketDepth = Math.max(0, bracketDepth - 1)
-      const isSeparator = bracketDepth === 0 && (char === ',' || /\s/.test(char))
-      if (isSeparator) flush()
-      else current += char
-    }
-    flush()
-  })
-  return tokens
+  return input.split(/\r?\n/).flatMap((rawLine, index) =>
+    stripNoise(rawLine)
+      .replace(SPACED_RANGE_RE, '[$1-$2]')
+      .split(SEPARATOR_RE)
+      .filter((text) => text !== '')
+      .map((text) => ({ text, line: index + 1 })),
+  )
 }

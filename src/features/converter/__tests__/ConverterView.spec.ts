@@ -51,6 +51,19 @@ describe('ConverterView', () => {
     expect(wrapper.find('[data-testid="output-summary"]').exists()).toBe(false)
   })
 
+  it.each([
+    ['all entries are invalid', '10.0.0.0/33'],
+    ['some entries are invalid', '10.0.0.0/8\n192.168.0.0/33'],
+  ])('withholds AllowedIPs when %s', async (_, text) => {
+    const wrapper = mountView('deny-to-allowed')
+    await wrapper.get('textarea').setValue(text)
+    expect(wrapper.find('[data-testid="output"]').exists()).toBe(false)
+    expect(wrapper.get('[data-testid="output-empty"]').text()).toMatch(/fix the problems/i)
+    expect(wrapper.find('[data-testid="output-summary"]').exists()).toBe(false)
+    const copy = wrapper.findAll('button').find((b) => b.text() === 'Copy')
+    expect(copy?.attributes('disabled')).toBeDefined()
+  })
+
   it('explains an empty result when everything is denied', async () => {
     const wrapper = mountView('deny-to-allowed')
     await wrapper.get('textarea').setValue('X.X.X.X')

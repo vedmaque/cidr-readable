@@ -49,9 +49,9 @@ test('converts readable patterns to CIDR and copies them for WireGuard', async (
   expect(clipboard).toBe('10.0.0.0/8, 172.0.0.0/12')
 })
 
-test('builds AllowedIPs from a deny list and reports invalid entries', async ({ page }) => {
+test('builds AllowedIPs from a deny list', async ({ page }) => {
   await page.goto('/#/deny-to-allowed')
-  await page.getByRole('textbox', { name: 'Denied networks' }).fill('128.0.0.0/1\n64.X.X.X, ::/0')
+  await page.getByRole('textbox', { name: 'Denied networks' }).fill('128.0.0.0/1\n64.X.X.X')
 
   await expect(output(page)).toHaveText(
     [
@@ -64,10 +64,23 @@ test('builds AllowedIPs from a deny list and reports invalid entries', async ({ 
       '96.0.0.0/3',
     ].join('\n'),
   )
+})
+
+test('withholds AllowedIPs while the deny list has invalid entries', async ({ page }) => {
+  await page.goto('/#/deny-to-allowed')
+  const input = page.getByRole('textbox', { name: 'Denied networks' })
+  await input.fill('128.0.0.0/1\n64.X.X.X, ::/0')
 
   const issues = page.getByRole('list', { name: 'Problems in the input' })
   await expect(issues).toContainText('Line 2')
   await expect(issues).toContainText('IPv6 is not supported')
+  await expect(output(page)).toBeHidden()
+  await expect(page.getByTestId('output-empty')).toContainText('Fix the problems')
+  await expect(page.getByRole('button', { name: 'Copy' })).toBeDisabled()
+
+  await input.fill('128.0.0.0/1\n64.X.X.X')
+  await expect(output(page)).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Copy' })).toBeEnabled()
 })
 
 test('keeps the input after a reload', async ({ page }) => {

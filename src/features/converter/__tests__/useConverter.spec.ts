@@ -22,7 +22,10 @@ describe('useConverter', () => {
     ['cidr-to-readable', '# just a comment\n,', 'no-entries'],
     ['cidr-to-readable', 'nope, 10.X.0.X', 'only-errors'],
     ['cidr-to-readable', 'nope, 10.0.0.0/8', 'ready'],
-    ['deny-to-allowed', '# nothing denied', 'ready'],
+    ['deny-to-allowed', '# nothing denied', 'no-entries'],
+    ['deny-to-allowed', '10.0.0.0/33', 'only-errors'],
+    ['deny-to-allowed', '10.0.0.0/8, 10.0.0.0/33', 'has-errors'],
+    ['deny-to-allowed', '10.0.0.5/8', 'ready'],
     ['deny-to-allowed', 'X.X.X.X', 'empty-result'],
   ] as const)('%s: %j → %s', (id, text, expected) => {
     const { input, status, outputText } = useConverter(mode(id))

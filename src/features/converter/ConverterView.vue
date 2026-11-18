@@ -17,8 +17,9 @@ const outputNoun = computed(() =>
   props.mode.output === 'cidr' ? ['network', 'networks'] : ['pattern', 'patterns'],
 )
 
+// Counts only describe a result that is actually shown (or legitimately empty).
 const summary = computed(() => {
-  if (status.value === 'idle' || status.value === 'no-entries') return ''
+  if (status.value !== 'ready' && status.value !== 'empty-result') return ''
   const { inputEntryCount, entries } = result.value
   const [singular, plural] = outputNoun.value as [string, string]
   const parts = [
@@ -32,6 +33,8 @@ const emptyMessages: Record<Exclude<ConverterStatus, 'ready'>, string> = {
   idle: 'The result will appear here as you type.',
   'no-entries': 'The input has no entries yet, only comments or blank lines.',
   'only-errors': 'Nothing to convert: fix the problems listed under the input.',
+  'has-errors':
+    'Fix the problems listed under the input first: invalid entries would be left out of the result.',
   'empty-result': props.mode.emptyResultMessage ?? 'The result is empty.',
 }
 

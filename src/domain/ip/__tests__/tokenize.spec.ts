@@ -26,8 +26,15 @@ describe('tokenize', () => {
     ])
   })
 
-  it('keeps whitespace inside brackets', () => {
-    expect(texts('172.[0 - 15].X.X 10.X.X.X')).toEqual(['172.[0 - 15].X.X', '10.X.X.X'])
+  it('accepts spaces inside a well-formed range', () => {
+    expect(texts('172.[0 - 15].X.X 10.[ 1-2 ].X.X')).toEqual(['172.[0-15].X.X', '10.[1-2].X.X'])
+  })
+
+  it.each([
+    ['comma', '10.[16-31, 192.168.0.0/16'],
+    ['space', '10.[16-31 192.168.0.0/16'],
+  ])('does not let an unclosed bracket swallow the next entry (%s)', (_, input) => {
+    expect(texts(input)).toEqual(['10.[16-31', '192.168.0.0/16'])
   })
 
   it('recovers from a stray closing bracket', () => {
