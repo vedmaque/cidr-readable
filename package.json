@@ -62,7 +62,13 @@
   "engines": {
     "node": "^22.18.0 || >=24.12.0"
   },
-  "description": "Convert IPv4 CIDR lists to a human-readable octet format and back, and build WireGuard AllowedIPs from a deny list.",
+  "description": "Converts IPv4 CIDR lists to a readable per-octet format and back, and computes WireGuard AllowedIPs from a list of networks to exclude.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vedmaque/cidr-readable.git"
+  },
+  "homepage": "https://vedmaque.github.io/cidr-readable/",
   "packageManager": "pnpm@11.10.0",
   "lint-staged": {
     "*.{ts,vue}": [

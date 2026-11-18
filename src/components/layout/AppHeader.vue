@@ -5,7 +5,7 @@
       <h1 class="text-xl font-semibold tracking-tight">CIDR Readable</h1>
     </div>
     <p class="text-sm text-zinc-600 dark:text-zinc-400">
-      Turn IPv4 CIDR lists into something a human can read — and back. Build WireGuard
+      Converts IPv4 CIDR lists to a readable per-octet format and back, and computes WireGuard
       <code class="font-mono text-[0.9em]">AllowedIPs</code> from a list of networks to exclude.
     </p>
   </header>

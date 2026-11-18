@@ -1,16 +1,31 @@
 # CIDR Readable
 
-A small web app for working with IPv4 network lists, especially WireGuard `AllowedIPs`.
+[![CI](https://github.com/vedmaque/cidr-readable/actions/workflows/ci.yml/badge.svg)](https://github.com/vedmaque/cidr-readable/actions/workflows/ci.yml)
+[![Deploy](https://github.com/vedmaque/cidr-readable/actions/workflows/deploy.yml/badge.svg)](https://github.com/vedmaque/cidr-readable/actions/workflows/deploy.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-- **CIDR → Readable** — turn `172.16.0.0/12` into `172.[16-31].X.X`.
-- **Readable → CIDR** — turn readable patterns back into the minimal CIDR list.
-- **Deny → AllowedIPs** — list networks that must bypass the tunnel and get the `AllowedIPs`
-  that cover everything else.
+A web app that converts IPv4 CIDR lists to a readable per-octet format and back, and computes
+WireGuard `AllowedIPs` from a list of networks to exclude.
 
-Input can be one entry per line or a comma-separated line copied straight from a WireGuard config
-(`AllowedIPs = …`). Formats can be mixed, `# comments` are ignored, and results are always
-normalized: sorted, deduplicated, with overlapping and adjacent networks merged. CIDR output can
-be shown one per line (default) or as a single WireGuard-ready line.
+App: https://vedmaque.github.io/cidr-readable/
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.png" />
+  <img alt="Deny → AllowedIPs mode: three local networks on the left, the resulting AllowedIPs on the right" src="docs/screenshot-light.png" />
+</picture>
+
+## Modes
+
+- **CIDR → Readable**: `172.16.0.0/12` → `172.[16-31].X.X`.
+- **Readable → CIDR**: readable patterns → the minimal list of CIDR blocks.
+- **Deny → AllowedIPs**: the CIDR blocks that cover the whole IPv4 space except the given
+  networks.
+
+Input entries are separated by newlines or commas, so a line copied from a WireGuard config
+(`AllowedIPs = …`) works as is. Both formats can be mixed; `# comments` are ignored. Output is
+sorted, with duplicates removed and overlapping or adjacent networks merged. CIDR output is one
+entry per line by default, or a single comma-separated line for WireGuard. Invalid entries are
+listed with their line numbers; the valid ones are still converted.
 
 ## Readable format
 
@@ -29,6 +44,7 @@ supported.
 
 ## Development
 
+Stack: Vue 3, TypeScript, Vite, Tailwind CSS, Vitest, Playwright.
 Requires Node 24 and pnpm (version pinned in `package.json`).
 
 ```sh
@@ -65,3 +81,7 @@ intervals, which are merged and then rendered into the requested format.
 `.github/workflows/ci.yml` runs lint, formatting, type-check, unit and e2e tests. When CI passes
 on `main`, `.github/workflows/deploy.yml` builds with `BASE_PATH=/<repo>/` and publishes to
 GitHub Pages (enable Pages with **Source: GitHub Actions** in the repository settings).
+
+## License
+
+[MIT](LICENSE) © vedmaque
