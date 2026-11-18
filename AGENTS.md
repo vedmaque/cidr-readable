@@ -28,7 +28,11 @@ E2E locally reuses a running dev server on :5173 (otherwise starts one); with `C
 
 A pre-commit hook (husky, `.husky/pre-commit` → lint-staged) runs oxlint, eslint and prettier on staged files. Commits from GUI clients rely on the developer's `~/.config/husky/init.sh` to put node/pnpm on `PATH`; don't hard-code machine-specific paths into the hook.
 
-pnpm enforces a minimum release age for packages; vitest is deliberately pinned to 4.x because 5.x was too new. Don't add `minimumReleaseAgeExclude` entries to get around it.
+pnpm enforces a minimum release age for packages, so the newest release is sometimes not installable yet; don't add `minimumReleaseAgeExclude` entries to get around it. Versions intentionally kept behind `latest`:
+
+- `typescript` stays on 6.x: `typescript-eslint` doesn't support TypeScript 7 yet (peer range `<6.1.0`).
+- `@types/node` follows the Node runtime major (24, see `.nvmrc`), not the latest Node types.
+- `oxlint` and `eslint-plugin-oxlint` must share the same version.
 
 ## Architecture
 
