@@ -41,6 +41,16 @@ describe('ConverterView', () => {
     expect(wrapper.get('[data-testid="output-empty"]').text()).toContain('fix the problems')
   })
 
+  it('does not report problems when the input has only comments and blank lines', async () => {
+    const wrapper = mountView('cidr-to-readable')
+    await wrapper.get('textarea').setValue('# office networks\n\n')
+    const empty = wrapper.get('[data-testid="output-empty"]').text()
+    expect(empty).toContain('no entries')
+    expect(empty).not.toContain('problems')
+    expect(wrapper.find('[data-testid="issues"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="output-summary"]').exists()).toBe(false)
+  })
+
   it('explains an empty result when everything is denied', async () => {
     const wrapper = mountView('deny-to-allowed')
     await wrapper.get('textarea').setValue('X.X.X.X')

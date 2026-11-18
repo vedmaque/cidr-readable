@@ -14,6 +14,8 @@ export interface ConverterMode {
   readonly output: OutputFormat
   /** When set, the WireGuard style renders a full config line: `<key> = a, b, c`. */
   readonly wireguardKey?: string
+  /** Why valid input can produce an empty result in this mode, if it can. */
+  readonly emptyResultMessage?: string
   readonly convert: (input: string) => ConversionResult
 }
 
@@ -53,6 +55,7 @@ export const MODES: readonly ConverterMode[] = [
     outputLabel: 'AllowedIPs',
     output: 'cidr',
     wireguardKey: 'AllowedIPs',
+    emptyResultMessage: 'The result is empty: the denied networks cover the whole IPv4 space.',
     convert: denyToAllowed,
   },
 ]

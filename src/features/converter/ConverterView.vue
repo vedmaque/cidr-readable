@@ -5,12 +5,12 @@ import InputPanel from './components/InputPanel.vue'
 import IssueList from './components/IssueList.vue'
 import OutputPanel from './components/OutputPanel.vue'
 import type { ConverterMode } from './modes'
-import { useConverter } from './useConverter'
+import { useConverter, type ConverterStatus } from './useConverter'
 
 const props = defineProps<{ mode: ConverterMode }>()
 
 // The route view is keyed by mode, so `mode` never changes during this component's lifetime.
-const { input, listStyle, supportsListStyle, hasInput, result, errorCount, outputText } =
+const { input, listStyle, supportsListStyle, result, errorCount, status, outputText } =
   useConverter(props.mode)
 
 const outputNoun = computed(() =>
@@ -18,7 +18,7 @@ const outputNoun = computed(() =>
 )
 
 const summary = computed(() => {
-  if (!hasInput.value) return ''
+  if (status.value === 'idle' || status.value === 'no-entries') return ''
   const { inputEntryCount, entries } = result.value
   const [singular, plural] = outputNoun.value as [string, string]
   const parts = [
@@ -28,12 +28,14 @@ const summary = computed(() => {
   return parts.join(' · ')
 })
 
-const emptyMessage = computed(() => {
-  if (!hasInput.value) return 'The result will appear here as you type.'
-  return result.value.inputEntryCount === 0 || errorCount.value === result.value.inputEntryCount
-    ? 'Nothing to convert yet — fix the problems in the input.'
-    : 'The result is empty: the denied networks cover the whole IPv4 space.'
-})
+const emptyMessages: Record<Exclude<ConverterStatus, 'ready'>, string> = {
+  idle: 'The result will appear here as you type.',
+  'no-entries': 'The input has no entries yet, only comments or blank lines.',
+  'only-errors': 'Nothing to convert: fix the problems listed under the input.',
+  'empty-result': props.mode.emptyResultMessage ?? 'The result is empty.',
+}
+
+const emptyMessage = computed(() => (status.value === 'ready' ? '' : emptyMessages[status.value]))
 </script>
 
 <template>

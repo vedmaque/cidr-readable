@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useId } from 'vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import PanelCard from './PanelCard.vue'
 
@@ -9,8 +10,9 @@ defineProps<{
 }>()
 const model = defineModel<string>({ required: true })
 
-const titleId = 'converter-input-title'
-const inputId = 'converter-input'
+const id = useId()
+const titleId = `${id}-title`
+const inputId = `${id}-input`
 </script>
 
 <template>

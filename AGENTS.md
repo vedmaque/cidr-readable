@@ -57,7 +57,7 @@ Tests live in `__tests__/` folders next to the code (the tsconfigs exclude and i
 
 - `modes.ts` defines the three modes as data (`ConverterMode`: labels, example, output format, optional `wireguardKey`, `convert` function). Adding or changing a mode is mostly a change here.
 - `router/index.ts` generates one route per mode, all using the same `ConverterView` with the mode passed as a prop. `App.vue` keys `<RouterView>` by route name, so the view (and `useConverter`) is re-created per mode and treats `mode` as constant.
-- `useConverter.ts` holds the input (VueUse `useStorage`, persisted per mode: `cidr-readable:input:<mode>`), the list style (`lines` | `wireguard`, shared across modes, only applies to CIDR output) and the derived result and output text. When `mode.wireguardKey` is set, the WireGuard style renders as `AllowedIPs = a, b, c`.
+- `useConverter.ts` holds the input (VueUse `useStorage`, persisted per mode: `cidr-readable:input:<mode>`), the list style (`lines` | `wireguard`, shared across modes, only applies to CIDR output) and the derived result and output text. When `mode.wireguardKey` is set, the WireGuard style renders as `AllowedIPs = a, b, c`. It also derives `status` (`idle` | `no-entries` | `only-errors` | `empty-result` | `ready`); the view picks the empty-state message from it, with mode-specific wording in `mode.emptyResultMessage`.
 
 **`src/components/`** holds generic UI (`ui/`: `BaseButton`, the generic `SegmentedControl`, `CopyButton` built on VueUse `useClipboard`) and the layout pieces.
 

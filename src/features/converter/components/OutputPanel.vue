@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useId } from 'vue'
 import type { ListStyle } from '@/domain/ip'
 import CopyButton from '@/components/ui/CopyButton.vue'
 import SegmentedControl from '@/components/ui/SegmentedControl.vue'
@@ -13,7 +14,7 @@ defineProps<{
 }>()
 const listStyle = defineModel<ListStyle>('listStyle', { required: true })
 
-const titleId = 'converter-output-title'
+const titleId = `${useId()}-title`
 const styleOptions = [
   { value: 'lines', label: 'Lines' },
   { value: 'wireguard', label: 'WireGuard' },

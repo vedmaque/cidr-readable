@@ -16,6 +16,21 @@ describe('useConverter', () => {
     expect(outputText.value).toBe('')
   })
 
+  it.each([
+    ['cidr-to-readable', '', 'idle'],
+    ['cidr-to-readable', '  \n ', 'idle'],
+    ['cidr-to-readable', '# just a comment\n,', 'no-entries'],
+    ['cidr-to-readable', 'nope, 10.X.0.X', 'only-errors'],
+    ['cidr-to-readable', 'nope, 10.0.0.0/8', 'ready'],
+    ['deny-to-allowed', '# nothing denied', 'ready'],
+    ['deny-to-allowed', 'X.X.X.X', 'empty-result'],
+  ] as const)('%s: %j → %s', (id, text, expected) => {
+    const { input, status, outputText } = useConverter(mode(id))
+    input.value = text
+    expect(status.value).toBe(expected)
+    expect(outputText.value === '').toBe(expected !== 'ready')
+  })
+
   it('converts input reactively', () => {
     const { input, outputText, result } = useConverter(mode('cidr-to-readable'))
     input.value = '172.16.0.0/12\n10.0.0.0/8'

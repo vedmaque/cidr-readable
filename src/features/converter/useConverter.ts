@@ -6,6 +6,16 @@ import type { ConverterMode } from './modes'
 const STORAGE_PREFIX = 'cidr-readable'
 
 /**
+ * What the output panel has to show:
+ * - `idle`: nothing typed yet;
+ * - `no-entries`: only comments, separators or blank lines;
+ * - `only-errors`: there are entries, but none of them is valid;
+ * - `empty-result`: valid entries that produce nothing (everything is denied);
+ * - `ready`: there is a result to show.
+ */
+export type ConverterStatus = 'idle' | 'no-entries' | 'only-errors' | 'empty-result' | 'ready'
+
+/**
  * State of one converter screen: the input (persisted per mode), the selected list style
  * (shared across modes) and the derived conversion result.
  */
@@ -27,13 +37,22 @@ export function useConverter(mode: ConverterMode) {
     () => result.value.issues.filter((issue) => issue.severity === 'error').length,
   )
 
+  const status = computed<ConverterStatus>(() => {
+    const { inputEntryCount, entries } = result.value
+    if (!hasInput.value) return 'idle'
+    if (entries.length > 0) return 'ready'
+    if (inputEntryCount === 0) return 'no-entries'
+    if (errorCount.value === inputEntryCount) return 'only-errors'
+    return 'empty-result'
+  })
+
   const outputText = computed(() => {
-    if (!hasInput.value) return ''
+    if (status.value !== 'ready') return ''
     const list = joinList(result.value.entries, listStyle.value)
     return listStyle.value === 'wireguard' && mode.wireguardKey !== undefined
       ? `${mode.wireguardKey} = ${list}`
       : list
   })
 
-  return { input, listStyle, supportsListStyle, hasInput, result, errorCount, outputText }
+  return { input, listStyle, supportsListStyle, hasInput, result, errorCount, status, outputText }
 }
